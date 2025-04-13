@@ -10,6 +10,10 @@ const verifyToken = require('./middlewares/JWT_middlewares')
 const authenticationRoutes = require('./authentication/auth');
 const userRoutes = require('./users/routes');
 const adminRoutes = require('./admin/routes');
+const organizationsRoutes = require('./organizations/routes');
+const teamsRoutes = require('./teams/routes');
+const projectsRoutes = require('./projects/routes');
+
 
 const path = require('path');
 
@@ -31,6 +35,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/auth', authenticationRoutes);
 app.use('/user', userRoutes);
 app.use('/admin', adminRoutes);
+app.use('/organizations', organizationsRoutes);
+app.use('/teams', teamsRoutes);
+app.use('/projects', projectsRoutes);
 
 // Example route to verify server
 app.get('/home', verifyToken, (request, response) => {
