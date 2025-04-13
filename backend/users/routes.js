@@ -40,7 +40,7 @@ router.put('/me/edit-profile', verifyToken, (request, response) => {
     const { username, firstname, lastname, email } = request.body;
 
 
-    database.get(`SELECT * FROM Users WHERE user_id = ?`, [user.user_id], async (error, user) => {
+    database.get(`SELECT * FROM Users WHERE user_id = ?`, [user.id], async (error, user) => {
 
         if (error || !user) {
             return response.status(404).json({ message: "User not Found" });
@@ -66,7 +66,7 @@ router.put('me/profile-image', verifyToken, (request, response) => {
 
     const profileImagePath = `/uploads/profile_images/${request.file.filename}`;
 
-    database.get(`SELECT * FROM Users WHERE user_id = ?`, [user.user_id], async (error, user) => {
+    database.get(`SELECT * FROM Users WHERE user_id = ?`, [user.id], async (error, user) => {
         if (error || !user) {
             return response.status(404).json({ message: "User not Found" });
         }
@@ -89,7 +89,7 @@ router.put('/me/change-password', verifyToken, (request, response) => {
     const { oldPassword, newPassword } = request.body;
 
 
-    database.get(`SELECT password FROM Users WHERE user_id = ?`, [user.user_id], async (error, user) => {
+    database.get(`SELECT password FROM Users WHERE user_id = ?`, [user.id], async (error, user) => {
 
         if (error || !user) {
             return response.status(404).json({ message: "User not found." })
@@ -110,6 +110,18 @@ router.put('/me/change-password', verifyToken, (request, response) => {
             response.clearCookie('token'); // clearing old JWT token to perform new login...
             response.json({ message: "Password updated successfully." })
         });
+    });
+});
+
+router.get('/me/ogranizations', verifyToken, (request, response) => {
+    const token = request.headers.authorization?.split(' ')[1];
+    const user = jwt.verify(token, secretKey);
+
+    console.log("User ID: ", user)
+
+    database.all("SELECT * FROM Organizations WHERE owner_id = ?", [user.id], (err, ogranizations) => {
+        if (err) return response.status(500).json({ message: "Database error", error: err.message });
+        response.json(ogranizations);
     });
 });
 
