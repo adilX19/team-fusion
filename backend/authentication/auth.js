@@ -32,7 +32,7 @@ router.post('/login', (request, response) => {
         }
 
         console.log("Secret:", secretKey)
-        const token = jwt.sign({ id: user.id, username: user.username, email: user.email }, secretKey, { expiresIn: expiresIn });
+        const token = jwt.sign({ id: user.user_id, username: user.username, email: user.email }, secretKey, { expiresIn: expiresIn });
 
         response.cookie('token', token, { httpOnly: false, maxAge: 60 * 60 * 1000 })
         response.status(200).json({
