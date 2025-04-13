@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS Organizations (
     org_id INTEGER PRIMARY KEY AUTOINCREMENT,
     org_name VARCHAR(255) NOT NULL UNIQUE,
     owner_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+    logo VARCHAR(255),
+    description VARCHAR(5000),
     -- The user who bought the tool
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -46,6 +48,7 @@ CREATE TABLE IF NOT EXISTS UserOrganizations (
     user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
     org_id INT REFERENCES Organizations(org_id) ON DELETE CASCADE,
     role TEXT CHECK(role IN ('OWNER', 'ADMIN', 'MEMBER')) DEFAULT 'MEMBER',
+    job_title VARCHAR(1000),
     -- 'OWNER', 'ADMIN', 'MEMBER'
     PRIMARY KEY (user_id, org_id)
 );
@@ -65,10 +68,12 @@ CREATE TABLE IF NOT EXISTS TeamMembers (
 CREATE TABLE IF NOT EXISTS Projects (
     project_id INTEGER PRIMARY KEY AUTOINCREMENT,
     project_name VARCHAR(255) NOT NULL,
+    description VARCHAR(5000),
     org_id INT REFERENCES Organizations(org_id) ON DELETE CASCADE,
     created_by INT REFERENCES Users(user_id),
     status VARCHAR(50) DEFAULT 'PLANNED',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deadline TIMESTAMP,
     CHECK (
         status IN (
             'PLANNED',
@@ -119,6 +124,8 @@ CREATE TABLE IF NOT EXISTS Subtasks (
 CREATE TABLE IF NOT EXISTS Assignments (
     assignment_id INTEGER PRIMARY KEY AUTOINCREMENT,
     task_id INT REFERENCES Tasks(task_id) ON DELETE CASCADE,
+    project_id INT REFERENCES Projects(project_id) ON DELETE CASCADE,
+    sprint_id INT REFERENCES Sprints(sprint_id) ON DELETE CASCADE,
     assigned_to_user INT REFERENCES Users(user_id) ON DELETE CASCADE,
     assigned_to_team INT REFERENCES Teams(team_id) ON DELETE CASCADE,
     assigned_by INT REFERENCES Users(user_id),
