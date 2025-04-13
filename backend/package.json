@@ -11,6 +11,7 @@
   },
   "scripts": {
     "dev": "nodemon app.js",
-    "migrate": "node database/migrations.js"
+    "migrate": "node database/migrations.js",
+    "seed": "node database/seed.js"
   }
 }
