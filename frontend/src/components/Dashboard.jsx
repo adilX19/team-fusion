@@ -8,6 +8,15 @@ export default function Dashboard() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+
+        const socket = new WebSocket("ws://localhost:3001")
+
+        socket.onmessage = (event) => {
+            const notification = JSON.parse(event.data);
+            console.log("New notification:", notification);
+            // Update UI or state here
+        };
+
         const fetchImages = async () => {
 
             try {
@@ -20,6 +29,8 @@ export default function Dashboard() {
             }
         }
         fetchImages();
+
+        return () => socket.close();
     }, [])
 
     return <Container className="mt-5">
