@@ -13,7 +13,11 @@ const adminRoutes = require('./admin/routes');
 const organizationsRoutes = require('./organizations/routes');
 const teamsRoutes = require('./teams/routes');
 const projectsRoutes = require('./projects/routes');
+const sprintsRoutes = require('./sprints/routes');
+const tasksRoutes = require('./tasks/routes');
+const notificationsRoutes = require('./notifications/routes');
 
+const { setupWebSocket } = require('./ws/socketServer');
 
 const path = require('path');
 
@@ -38,13 +42,17 @@ app.use('/admin', adminRoutes);
 app.use('/organizations', organizationsRoutes);
 app.use('/teams', teamsRoutes);
 app.use('/projects', projectsRoutes);
+app.use('/sprints', sprintsRoutes);
+app.use('/tasks', tasksRoutes);
+app.use('/notifications', notificationsRoutes);
 
-// Example route to verify server
-app.get('/home', verifyToken, (request, response) => {
-    response.json({ message: `Welcome to TeamSphere! ${request.user.username}` });
-});
 
-// Start server
+// socket imports
+const http = require('http');
+const server = http.createServer(app);
+
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on http://localhost:${process.env.PORT}`);
 });
+
+setupWebSocket(server); // Init WS server
