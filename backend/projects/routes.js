@@ -11,7 +11,7 @@ const router = express.Router();
 const secretKey = process.env.JWT_SECRET;
 
 // 1. All projects
-router.get('/all', (request, response) => {
+router.get('/all', verifyToken, (request, response) => {
   database.all('SELECT * FROM Projects', (err, rows) => {
     if (err) return response.status(500).json({ error: err.message });
     response.json(rows);
@@ -19,7 +19,7 @@ router.get('/all', (request, response) => {
 });
 
 // 2. Projects by Organizations
-router.get('/organization/:org_id', (request, response) => {
+router.get('/organization/:org_id', verifyToken, (request, response) => {
   const orgId = request.params.org_id;
   database.all('SELECT * FROM Projects WHERE org_id = ?', [orgId], (err, projects) => {
     if (err) return response.status(500).json({ error: err.message });
@@ -28,7 +28,7 @@ router.get('/organization/:org_id', (request, response) => {
 });
 
 // 3. Create a new project
-router.post('/add-new', (request, response) => {
+router.post('/add-new', verifyToken, (request, response) => {
   const { project_name, description, org_id, created_by, status, deadline } = request.body;
   const query = `
     INSERT INTO Projects (project_name, description, org_id, created_by, status, deadline)
@@ -45,7 +45,7 @@ router.post('/add-new', (request, response) => {
 });
 
 // 4. Get specific project details
-router.get('/:project_id', (request, response) => {
+router.get('/:project_id', verifyToken, (request, response) => {
   const projectId = request.params.project_id;
   database.get('SELECT * FROM Projects WHERE project_id = ?', [projectId], (err, project) => {
     if (err) return response.status(500).json({ error: err.message });
@@ -55,7 +55,7 @@ router.get('/:project_id', (request, response) => {
 });
 
 // 5. Update a project
-router.put('/:project_id/update', (request, response) => {
+router.put('/:project_id/update', verifyToken, (request, response) => {
   const projectId = request.params.project_id;
   const { project_name, description, status, deadline } = request.body;
 
@@ -76,7 +76,7 @@ router.put('/:project_id/update', (request, response) => {
 });
 
 // 6. Delete a project
-router.delete('/:project_id/delete', (request, response) => {
+router.delete('/:project_id/delete', verifyToken, (request, response) => {
   const projectId = request.params.project_id;
   database.run('DELETE FROM Projects WHERE project_id = ?', [projectId], function (err) {
     if (err) return response.status(500).json({ error: err.message });
