@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Container from "react-bootstrap/esm/Container";
 import api from '../services/api';
 
 export default function Dashboard() {
@@ -33,10 +32,10 @@ export default function Dashboard() {
         return () => socket.close();
     }, [])
 
-    return <Container className="mt-5">
-        <br /><br />
+    return (
+      <>
         <h1>Welcome to Dashboard</h1>
         <p>{message}</p>
-        <a href="/logout">Logout</a>
-    </Container>
+      </>
+    );
 }
