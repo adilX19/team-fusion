@@ -91,4 +91,12 @@ router.post("/export", verifyToken, async (request, response) => {
     }
 });
 
+// 5. Tasks overview endpoint
+router.post("/tasks/overview", verifyToken, async (request, response) => {
+
+});
+
+
+// 6. Projects Overview endpoint
+
 module.exports = router;

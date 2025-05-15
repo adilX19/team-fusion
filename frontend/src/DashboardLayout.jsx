@@ -1,9 +1,17 @@
 // Layout.jsx
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import MainLogo from "../src/assets/team-fusion-logo.png";
 import { useLocation } from "react-router-dom";
 import { Layout as AntLayout, Menu, Breadcrumb, theme, Button } from "antd";
-import { Typography, Avatar, Badge, Dropdown, Space, Popover } from "antd";
+import {
+  Typography,
+  Avatar,
+  Badge,
+  Dropdown,
+  Space,
+  Popover,
+  Divider,
+} from "antd";
 import {
   DashboardOutlined,
   ProjectOutlined,
@@ -22,6 +30,9 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 
+import { AuthContext } from "./context/AuthContext";
+import { io } from "socket.io-client";
+
 import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -29,8 +40,12 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 
 const Layout = ({ children }) => {
-  const { Title } = Typography;
+  const [selectOption, setSelectedOption] = useState("dashboard");
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const { Header, Sider, Content } = AntLayout;
+
+  const { user, messageApi, createNotification } = useContext(AuthContext);
 
   const [collapsed, setCollapsed] = useState(false);
   const {
@@ -64,7 +79,7 @@ const Layout = ({ children }) => {
     },
     {
       key: "4",
-      label: "Settings",
+      label: <a href="/profile-settings">Settings</a>,
       icon: <SettingOutlined />,
     },
     {
@@ -78,7 +93,35 @@ const Layout = ({ children }) => {
   ];
 
   const location = useLocation();
-  const hideHeaderOnPaths = ["/", "/signup"];
+
+  useEffect(() => {
+    const path = location.pathname.split("/")[1]; // take first part after "/"
+    setSelectedOption(path || "dashboard");
+    console.log("User", user);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const socket = io("http://localhost:5000", {
+      withCredentials: true,
+    });
+
+    socket.emit("REGISTER", user.user_id);
+
+    socket.on("NOTIFICATION", (data) => {
+      createNotification("info", data.message);
+    });
+
+    return () => {
+      console.log("Turning oFff socket.");
+      socket.off("NOTIFICATION");
+    };
+  }, []);
+
+  const handleClick = (e) => {
+    setSelectedOption(e.key);
+  };
 
   return (
     <AntLayout style={{ minHeight: "100vh" }}>
@@ -98,41 +141,55 @@ const Layout = ({ children }) => {
       >
         <div
           className="logo"
-          style={{ textAlign: "center", marginBottom: "30px", color: 'white' }}
+          style={{ textAlign: "center", marginBottom: "30px", color: "white" }}
         >
-          Team <img
+          Team{" "}
+          <img
             src={MainLogo}
             alt=""
             style={{
               width: 60,
               margin: "auto",
             }}
-          /> Fusion
+          />{" "}
+          Fusion
           <br />
         </div>
         <div className="demo-logo-vertical" />
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]}>
-          <Menu.Item key="1" icon={<DashboardOutlined />}>
-            Dashboard
+        <Menu
+          theme="dark"
+          mode="inline"
+          selectedKeys={[selectOption]}
+          onClick={handleClick}
+        >
+          <Menu.Item key="home" icon={<DashboardOutlined />}>
+            <a href="/home">Dashboard</a>
           </Menu.Item>
-          <Menu.Item key="2" icon={<ProjectOutlined />}>
-            Projects
+          <Menu.Item key="projects" icon={<ProjectOutlined />}>
+            <a href="/projects">Projects</a>
           </Menu.Item>
-          <Menu.Item key="3" icon={<SplitCellsOutlined />}>
-            Sprints
+          <Menu.Item key="tasks" icon={<FileDoneOutlined />}>
+            <a href="/tasks">Tasks</a>
           </Menu.Item>
-          <Menu.Item key="4" icon={<TeamOutlined />}>
-            Teams
+          <Menu.Item key="teams" icon={<TeamOutlined />}>
+            <a href="/teams">Teams</a>
           </Menu.Item>
-          <Menu.Item key="5" icon={<FileDoneOutlined />}>
-            Tasks
-          </Menu.Item>
-          <Menu.Item key="6" icon={<BarChartOutlined />}>
+          <Menu.Item key="reports" icon={<BarChartOutlined />}>
             Reports
           </Menu.Item>
-          <Menu.Item key="7" icon={<CloudUploadOutlined />}>
+          <Menu.Item key="files" icon={<CloudUploadOutlined />}>
             Files
           </Menu.Item>
+          <Menu.Item key="notifications" icon={<BellOutlined />}>
+            <a href="/notifications">Notifications</a>
+          </Menu.Item>
+          {user?.is_superuser ? (
+            <Menu.Item key="admin-panel" icon={<UserOutlined />}>
+              <a href="/admin-panel">Admin Panel</a>
+            </Menu.Item>
+          ) : (
+            ""
+          )}
         </Menu>
       </Sider>
       <AntLayout style={{ marginLeft: 200 }}>

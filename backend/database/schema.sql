@@ -8,12 +8,10 @@ CREATE TABLE IF NOT EXISTS Users (
     password VARCHAR(255) NOT NULL,
     profile_image VARCHAR(255),
     role TEXT CHECK(role IN ('OWNER', 'ADMIN', 'MEMBER')) DEFAULT 'MEMBER',
-    title VARCHAR(500) NOT NULL,
+    title VARCHAR(500),
     is_superuser BOOLEAN DEFAULT FALSE,
     is_staff BOOLEAN DEFAULT FALSE,
-    reports_to INT REFERENCES Users(user_id) ON DELETE
-    SET NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS Organizations (
     org_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,6 +46,8 @@ CREATE TABLE IF NOT EXISTS UserOrganizations (
     user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
     org_id INT REFERENCES Organizations(org_id) ON DELETE CASCADE,
     role TEXT CHECK(role IN ('OWNER', 'ADMIN', 'MEMBER')) DEFAULT 'MEMBER',
+    reports_to INT REFERENCES Users(user_id) ON DELETE
+    SET NULL,
     job_title VARCHAR(1000),
     -- 'OWNER', 'ADMIN', 'MEMBER'
     PRIMARY KEY (user_id, org_id)
@@ -55,6 +55,8 @@ CREATE TABLE IF NOT EXISTS UserOrganizations (
 CREATE TABLE IF NOT EXISTS Teams (
     team_id INTEGER PRIMARY KEY AUTOINCREMENT,
     team_name VARCHAR(255) NOT NULL,
+    description VARCHAR(5000),
+    team_lead INTEGER NOT NULL,
     org_id INT REFERENCES Organizations(org_id) ON DELETE CASCADE,
     created_by INT REFERENCES Users(user_id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -62,7 +64,7 @@ CREATE TABLE IF NOT EXISTS Teams (
 CREATE TABLE IF NOT EXISTS TeamMembers (
     team_member_id INTEGER PRIMARY KEY AUTOINCREMENT,
     team_id INT REFERENCES Teams(team_id) ON DELETE CASCADE,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE, 
     UNIQUE (team_id, user_id)
 );
 CREATE TABLE IF NOT EXISTS Projects (
@@ -152,6 +154,7 @@ CREATE TABLE IF NOT EXISTS Notifications (
     related_entity_id INT,
     CHECK (
         notification_type IN (
+            'PROJECT_ASSIGNED',
             'TASK_ASSIGNED',
             'SPRINT_STARTED',
             'SPRINT_ASSIGNED',

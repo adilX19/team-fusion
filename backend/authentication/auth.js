@@ -37,7 +37,7 @@ router.post('/login', (request, response) => {
         response.cookie('token', token, { httpOnly: false, maxAge: 60 * 60 * 1000 })
         response.status(200).json({
             token: token,
-            user: { id: user.id, role: user.role }
+            user: user
         });
     })
 
@@ -89,8 +89,11 @@ router.get('/validate-token', (request, response) => {
     try {
         const decoded = jwt.verify(token, secretKey);
         // Retrieve the user from your database based on decoded data (e.g., user ID)
-        const user = { id: decoded.id, role: decoded.role }; // Example user object
-        response.json({ user });
+        database.get(`SELECT * FROM Users WHERE user_id = ?`, [decoded.id], async (err, user) => {
+            if (!user) {return response.status(404).json({"message": "User not found"})}
+            if (err) { return response.status(500).json({"message": err.message})}
+            response.json({ user })
+        })
     } catch (err) {
         response.status(401).json({ message: 'Invalid or expired token' });
     }

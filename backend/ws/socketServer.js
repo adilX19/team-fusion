@@ -1,40 +1,48 @@
-// ws/socketServer.js
-const WebSocket = require('ws');
+// socket.js
+const { Server } = require("socket.io");
 
-const clients = new Map(); // user_id => ws
+let io;
+let onlineUsers = new Map();
 
-function setupWebSocket(server) {
-    const wss = new WebSocket.Server({ noServer: true });
+function initSocket(server) {
+  io = new Server(server, {
+    cors: {
+      origin: "http://localhost:5173",
+      methods: ["GET", "POST"],
+      credentials: true,
+    },
+  });
 
-    server.on('upgrade', (req, socket, head) => {
-        wss.handleUpgrade(req, socket, head, ws => {
-            wss.emit('connection', ws, req);
-        });
+  io.on("connection", (socket) => {
+    socket.on("REGISTER", (user_id) => {
+      onlineUsers.set(user_id, socket.id);
+      console.log(`🧑 User ${user_id} connected with socket ID ${socket.id}`);
     });
 
-    wss.on('connection', (ws, req) => {
-        ws.on('message', msg => {
-            try {
-                const data = JSON.parse(msg);
-                if (data.type === 'REGISTER' && data.user_id) {
-                    clients.set(data.user_id, ws);
-                    console.log(`🧑 User ${data.user_id} registered to WS`);
-                }
-            } catch (err) {
-                console.error('WS parse error:', err);
-            }
-        });
-
-        ws.on('close', () => {
-            for (let [uid, socket] of clients.entries()) {
-                if (socket === ws) clients.delete(uid);
-            }
-        });
+    socket.on("disconnect", () => {
+      for (let [uid, sid] of onlineUsers.entries()) {
+        if (sid === socket.id) {
+          onlineUsers.delete(uid);
+          break;
+        }
+      }
     });
+  });
 }
 
-function getClient(user_id) {
-    return clients.get(user_id);
+function getIO() {
+  if (!io) {
+    throw new Error("Socket.io not initialized");
+  }
+  return io;
 }
 
-module.exports = { setupWebSocket, getClient };
+function getOnlineUsers() {
+  return onlineUsers;
+}
+
+module.exports = {
+  initSocket,
+  getIO,
+  getOnlineUsers,
+};

@@ -6,12 +6,20 @@ import Logout from "./components/Logout";
 import Layout from "./DashboardLayout";
 import AuthLayout from "./AuthLayout";
 import { AuthProvider } from "./context/AuthContext";
-import Dashboard from "./components/Dashboard";
+
+// pages imports
+import Dashboard from "./pages/Dashboard";
+import AdminPanel from "./pages/AdminPanel";
+import ProjectsPage from "./pages/projects/ProjectsPage";
+import ProjectDetailPage from "./pages/projects/ProjectDetailPage";
+import TeamsPage from "./pages/teams/TeamsPage";
+import TaskPage from "./pages/TaskPage";
+import ProfileSettings from "./components/ProfileSettings";
+import NotificationsPage from "./pages/NotificationsPage";
+
 import "rsuite/dist/rsuite.min.css";
-import Cookies from "js-cookie";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
-
 
 function App() {
   return (
@@ -42,6 +50,80 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <Dashboard />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile-settings"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ProfileSettings />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projects"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ProjectsPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/projects/:projectId"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ProjectDetailPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/teams"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <TeamsPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tasks"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <TaskPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <NotificationsPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin-panel"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <AdminPanel />
                   </Layout>
                 </ProtectedRoute>
               }
