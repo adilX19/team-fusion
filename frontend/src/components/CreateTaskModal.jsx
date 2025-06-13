@@ -115,6 +115,8 @@ const CreateTaskModal = ({
 
       message.success("Task created!");
       form.resetFields();
+      setSelectedAssignees([]);
+      setPrevAssignees([]);
       onCreated();
     } catch (err) {
       console.error(err);

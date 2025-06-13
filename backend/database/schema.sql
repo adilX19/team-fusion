@@ -186,3 +186,24 @@ CREATE TABLE IF NOT EXISTS FileAttachments (
         related_entity_type IN ('TASK', 'SUBTASK', 'SPRINT', 'PROJECT')
     )
 );
+
+CREATE TABLE Meetings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  description TEXT,
+  date TEXT NOT NULL,           -- Format: 'YYYY-MM-DD'
+  time TEXT NOT NULL,           -- Format: 'HH:MM' (24-hour)
+  duration_minutes INTEGER,     -- Duration of meeting in minutes
+  location TEXT,                -- Optional: physical or virtual meeting location
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Reminders (
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   meeting_id INTEGER NOT NULL,
+   reminder_time TEXT NOT NULL,         -- Format: 'YYYY-MM-DD HH:MM'
+   method TEXT DEFAULT 'email',         -- Method: 'email', 'popup', etc.
+   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+   FOREIGN KEY (meeting_id) REFERENCES Meetings(id) ON DELETE CASCADE
+);

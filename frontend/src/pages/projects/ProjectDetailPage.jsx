@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import {Link} from "react-router-dom";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -160,7 +161,9 @@ const ProjectDetailPage = () => {
           renderItem={(sprint) => (
             <List.Item>
               <List.Item.Meta
-                title={sprint.sprint_name}
+                title={<Link to={`/sprints/${sprint.sprint_id}`}>
+                  <b>📋 {sprint.sprint_name}</b>
+                </Link>}
                 description={`From ${moment(sprint.start_date).format(
                   "YYYY-MM-DD"
                 )} to ${moment(sprint.end_date).format("YYYY-MM-DD")}`}

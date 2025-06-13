@@ -14,12 +14,16 @@ import ProjectsPage from "./pages/projects/ProjectsPage";
 import ProjectDetailPage from "./pages/projects/ProjectDetailPage";
 import TeamsPage from "./pages/teams/TeamsPage";
 import TaskPage from "./pages/TaskPage";
+import MyTaskPage from "./pages/MyTasksPage";
 import ProfileSettings from "./components/ProfileSettings";
 import NotificationsPage from "./pages/NotificationsPage";
+import Calendar from "./components/Calendar";
 
 import "rsuite/dist/rsuite.min.css";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
+import TaskDetailPage from "./pages/TaskDetailPage.jsx";
+import SprintDetailPage from "./pages/SprintDetailPage.jsx";
 
 function App() {
   return (
@@ -64,6 +68,16 @@ function App() {
                 </ProtectedRoute>
               }
             />
+              <Route
+                  path="/my-work"
+                  element={
+                      <ProtectedRoute>
+                          <Layout>
+                              <MyTaskPage />
+                          </Layout>
+                      </ProtectedRoute>
+                  }
+              />
             <Route
               path="/projects"
               element={
@@ -85,6 +99,32 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+              <Route
+                  path="/tasks/:taskId"
+                  element={
+                      <ProtectedRoute>
+                          <Layout>
+                              <TaskDetailPage />
+                          </Layout>
+                      </ProtectedRoute>
+                  }
+              />
+
+
+              <Route
+                  path="/sprints/:sprintId"
+                  element={
+                      <ProtectedRoute>
+                          <Layout>
+                              <SprintDetailPage />
+                          </Layout>
+                      </ProtectedRoute>
+                  }
+              />
+
+
+
 
             <Route
               path="/teams"
@@ -117,6 +157,17 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+              <Route
+                  path="/calendar"
+                  element={
+                      <ProtectedRoute>
+                          <Layout>
+                              <Calendar />
+                          </Layout>
+                      </ProtectedRoute>
+                  }
+              />
 
             <Route
               path="/admin-panel"

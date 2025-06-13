@@ -2,6 +2,7 @@ const database = require("../database/connection");
 const jwt = require("jsonwebtoken");
 const express = require("express");
 const dotenv = require("dotenv");
+const upload = require('../utils/upload'); // Adjust path as needed
 
 const verifyToken = require("../middlewares/JWT_middlewares");
 
@@ -135,6 +136,86 @@ router.put("/:task_id/update", verifyToken, (request, response) => {
       response.json({ message: "Task updated successfully" });
     }
   );
+});
+
+router.patch("/:task_id/status", verifyToken, (request, response) => {
+    const { task_id } = request.params;
+    const { status } = request.body;
+    database.run(
+        `UPDATE Tasks SET status = ? WHERE task_id = ?`,
+        [status, task_id],
+        function (err) {
+            if (err) return response.status(500).json({ error: err.message });
+            if (this.changes === 0)
+                return response.status(404).json({ error: "Task not found" });
+            response.json({ message: "Task updated successfully" });
+        }
+    );
+});
+
+// Get all file attachments for a task
+router.get('/:taskId/files', async (req, res) => {
+    const { taskId } = req.params;
+    const query = `SELECT * FROM FileAttachments WHERE related_entity_type = 'TASK' AND related_entity_id = ? ORDER BY uploaded_at DESC`;
+    database.all(query, [taskId], (err, files) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ files });
+    });
+});
+
+// Upload a file for a task
+router.post('/:taskId/upload', upload.single('file'), async (req, res) => {
+    const { taskId } = req.params;
+    const token = req.headers.authorization?.split(" ")[1];
+    const user = jwt.verify(token, secretKey);
+    const userId = user.id;
+    const { originalname, path: filePath } = req.file;
+
+    const fileUrl = `http://localhost:5000/uploads/${originalname}`; // Relative path accessible via browser
+
+    const query = `
+    INSERT INTO FileAttachments (
+      uploaded_by, related_entity_type, related_entity_id,
+      file_name, file_path
+    ) VALUES (?, 'TASK', ?, ?, ?)
+  `;
+    database.run(query, [userId, taskId, originalname, fileUrl], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(201).json({ message: 'File uploaded', file_id: this.lastID });
+    });
+});
+
+// Get comments/notes for a task
+router.get('/:taskId/notes', async (req, res) => {
+    const { taskId } = req.params;
+    const query = `
+    SELECT c.*, u.username FROM Comments c
+    JOIN Users u ON u.user_id = c.user_id
+    WHERE c.related_entity_type = 'TASK' AND c.related_entity_id = ?
+    ORDER BY c.created_at DESC;
+  `;
+    database.all(query, [taskId], (err, notes) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ notes });
+    });
+});
+
+// Add a comment/note for a task
+router.post('/:taskId/notes', async (req, res) => {
+    const { taskId } = req.params;
+    const { note } = req.body;
+    const token = req.headers.authorization?.split(" ")[1];
+    const user = jwt.verify(token, secretKey);
+    const userId = user.id;
+
+    const query = `
+    INSERT INTO Comments (user_id, related_entity_type, related_entity_id, comment_text)
+    VALUES (?, 'TASK', ?, ?)
+  `;
+    database.run(query, [userId, taskId, note], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(201).json({ message: 'Note added', comment_id: this.lastID });
+    });
 });
 
 // 6. Delete task

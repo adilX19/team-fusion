@@ -19,6 +19,8 @@ const sprintsRoutes = require("./sprints/routes");
 const tasksRoutes = require("./tasks/routes");
 const notificationsRoutes = require("./notifications/routes");
 const assignmentRoutes = require("./assignments/routes");
+const calendarRoutes = require("./calendar/routes");
+
 const { initSocket, getIO, getOnlineUsers } = require("./ws/socketServer");
 
 dotenv.config();
@@ -37,8 +39,8 @@ app.set("clients", clients);
 // Middleware
 const corsOptions = {
   origin: ["http://localhost:5173"],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: "*",
   credentials: true,
 };
 
@@ -58,6 +60,7 @@ app.use("/projects", projectsRoutes);
 app.use("/sprints", sprintsRoutes);
 app.use("/tasks", tasksRoutes);
 app.use("/assignments", assignmentRoutes);
+app.use("/calendar", calendarRoutes);
 app.use("/notifications", notificationsRoutes);
 app.use("/insights", insightsRoutes);
 

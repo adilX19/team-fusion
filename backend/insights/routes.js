@@ -21,10 +21,10 @@ router.get("/dashboard", verifyToken, async (request, response) => {
         (SELECT COUNT(*) FROM Users) AS totalUsers
     `;
     const recentActivitiesQuery = `
-      SELECT notification_id AS id, message, created_at 
+      SELECT notification_id AS id, message, created_at, related_entity_type, related_entity_id
       FROM Notifications 
       ORDER BY created_at DESC 
-      LIMIT 5
+      LIMIT 3
     `;
 
     const taskStatusSummary = await queryPromise(taskStatusQuery);
@@ -33,12 +33,27 @@ router.get("/dashboard", verifyToken, async (request, response) => {
     const totalStatsResult = await queryPromise(totalStatsQuery);
     const recentActivities = await queryPromise(recentActivitiesQuery);
 
+    const enrichedActivities = await Promise.all(
+        recentActivities.map(async (activity) => {
+          if (activity.related_entity_type === "task") {
+            const result = await queryPromise(
+                `SELECT task_name FROM Tasks WHERE task_id = ${activity.related_entity_id}`
+            );
+            return {
+              ...activity,
+              task_text: result[0]?.task_name || null,
+            };
+          }
+          return activity;
+        })
+    );
+
     response.status(200).json({
       taskStatusSummary,
       sprintStatusSummary,
       projectStatusSummary,
       totalStats: totalStatsResult[0],
-      recentActivities,
+      enrichedActivities,
     });
   } catch (error) {
     console.error("Dashboard error:", error);

@@ -28,6 +28,7 @@ import {
   ClusterOutlined,
   UserOutlined,
   LogoutOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 
 import { AuthContext } from "./context/AuthContext";
@@ -59,10 +60,9 @@ const Layout = ({ children }) => {
 
   const content = (
     <ul>
-      <li>My Notification 1</li>
-      <li>My Notification 2</li>
-      <li>My Notification 3</li>
-      <li>My Notification 4</li>
+      <li>🔔 You've been Assigned a new Task</li>
+      <li>🔔 You've been Assigned a new Sprint</li>
+      <li>🔔 You've been Assigned a new Project</li>
     </ul>
   );
 
@@ -74,7 +74,7 @@ const Layout = ({ children }) => {
     },
     {
       key: "3",
-      label: "My Tasks",
+      label: <a href="/my-work">My Tasks</a>,
       icon: <ClusterOutlined />,
     },
     {
@@ -114,7 +114,7 @@ const Layout = ({ children }) => {
     });
 
     return () => {
-      console.log("Turning oFff socket.");
+      // console.log("Turning oFff socket.");
       socket.off("NOTIFICATION");
     };
   }, []);
@@ -174,11 +174,8 @@ const Layout = ({ children }) => {
           <Menu.Item key="teams" icon={<TeamOutlined />}>
             <a href="/teams">Teams</a>
           </Menu.Item>
-          <Menu.Item key="reports" icon={<BarChartOutlined />}>
-            Reports
-          </Menu.Item>
-          <Menu.Item key="files" icon={<CloudUploadOutlined />}>
-            Files
+          <Menu.Item key="files" icon={<CalendarOutlined />}>
+            <a href="/calendar">Calendar</a>
           </Menu.Item>
           <Menu.Item key="notifications" icon={<BellOutlined />}>
             <a href="/notifications">Notifications</a>

@@ -202,12 +202,12 @@ router.get("/me/organization-users", verifyToken, (request, response) => {
   database.all(
     "SELECT * FROM Organizations WHERE owner_id = ?",
     [user.id],
-    (err, ogranizations) => {
+    (err, organizations) => {
       if (err)
         return response
           .status(500)
           .json({ message: "Database error", error: err.message });
-      const org_ids = ogranizations.map((org) => org.org_id);
+      const org_ids = organizations.map((org) => org.org_id);
 
       if (org_ids.length <= 0) {
         return response
@@ -294,5 +294,91 @@ router.get("/list/:org_id", verifyToken, (request, response) => {
     }
   );
 });
+
+// assigned Projects
+router.get('/me/assigned-projects', async (request, response) => {
+    const token = request.headers.authorization?.split(" ")[1];
+    const user = jwt.verify(token, secretKey);
+    const userId = user.id;
+
+    console.log("User ID in MyWork", userId);
+
+    const sql = `
+        SELECT
+            a.project_id,
+            p.project_name,
+            p.description,
+            p.status
+        FROM Assignments a
+                 LEFT JOIN Projects p ON a.project_id = p.project_id
+        WHERE a.assigned_to_user = ? AND a.project_id IS NOT NULL;
+  `;
+
+    database.all(sql, [userId], (err, rows) => {
+        if (err) {
+            console.error('Error fetching tasks:', err);
+            return response.status(500).json({ error: 'Failed to fetch projects' });
+        }
+        response.json({ projects: rows });
+    });
+});
+
+// assigned Sprints
+router.get('/me/assigned-sprints', async (request, response) => {
+    const token = request.headers.authorization?.split(" ")[1];
+    const user = jwt.verify(token, secretKey);
+    const userId = user.id;
+
+    console.log("User ID in MyWork", userId);
+
+    const sql = `
+        SELECT
+            a.project_id,
+            s.sprint_name,
+            s.start_date,
+            s.end_date,
+            s.status
+        FROM Assignments a
+                 LEFT JOIN Sprints s ON a.sprint_id = s.sprint_id
+        WHERE a.assigned_to_user = ? AND a.sprint_id IS NOT NULL;
+  `;
+
+    database.all(sql, [userId], (err, rows) => {
+        if (err) {
+            console.error('Error fetching tasks:', err);
+            return response.status(500).json({ error: 'Failed to fetch sprints' });
+        }
+        response.json({ sprints: rows });
+    });
+});
+
+// assigned Tasks
+router.get('/me/assigned-tasks', async (request, response) => {
+    const token = request.headers.authorization?.split(" ")[1];
+    const user = jwt.verify(token, secretKey);
+    const userId = user.id;
+
+    console.log("User ID in MyWork", userId);
+
+    const sql = `
+    SELECT 
+      t.task_id,
+      t.task_name,
+      t.status,
+      t.created_at
+    FROM Assignments a
+    JOIN Tasks t ON a.task_id = t.task_id
+    WHERE a.assigned_to_user = ?
+  `;
+
+    database.all(sql, [userId], (err, rows) => {
+        if (err) {
+            console.error('Error fetching tasks:', err);
+            return response.status(500).json({ error: 'Failed to fetch tasks' });
+        }
+        response.json({ tasks: rows });
+    });
+});
+
 
 module.exports = router;
